@@ -1,50 +1,33 @@
 "use client";
 
 import { useEffect } from "react";
-import StickyScrollCards, { MemoryCard } from "@/components/StickyScrollCards";
+import { StickyScrollCards } from "@/components/ui/sticky-scroll-cards";
+import type { StickyScrollCardItem } from "@/components/ui/sticky-scroll-cards";
 
 /* ─── DATA ─── */
-const CARDS: MemoryCard[] = [
+const MEMORY_CARDS: StickyScrollCardItem[] = [
   {
-    id: "m1",
     title: "The very first hello",
-    date: "May 2024 · Where it all began",
-    caption: "That nervous smile, that first conversation — neither of us knew this was the start of everything.",
     src: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&q=80&fit=crop",
   },
   {
-    id: "m2",
     title: "Golden hour walks",
-    date: "Summer 2024 · Every weekend",
-    caption: "Those long evenings where we forgot what time it was. The world softened around us.",
     src: "https://images.unsplash.com/photo-1504006833117-8886a355efbf?w=600&q=80&fit=crop",
   },
   {
-    id: "m3",
     title: "Our kitchen mornings",
-    date: "Autumn 2024 · Home",
-    caption: "Coffee too hot, music too loud, and laughing at absolutely nothing. That was home.",
     src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80&fit=crop",
   },
   {
-    id: "m4",
     title: "Rainy day reading",
-    date: "Winter 2024 · Cozy & quiet",
-    caption: "Rain on the windows, a shared blanket, two books — and still choosing to talk instead.",
     src: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&q=80&fit=crop",
   },
   {
-    id: "m5",
     title: "Somewhere new together",
-    date: "Spring 2025 · Adventures",
-    caption: "Getting lost was never scary with you. Every wrong turn became a favourite memory.",
     src: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&q=80&fit=crop",
   },
   {
-    id: "m6",
     title: "Just the two of us",
-    date: "Year Two · Still us",
-    caption: "No grand occasion. Just an ordinary Tuesday that somehow felt like the whole world.",
     src: "https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?w=600&q=80&fit=crop",
   },
 ];
@@ -64,36 +47,60 @@ const TIMELINE = [
     desc: "The moment our story quietly began.",
     img: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=220&q=75&fit=crop",
     rot: "-4deg",
+    sidePin: 1,
+    offsetY: 0,
+    offsetX: 0,
+    petalAng: 45,
   },
   {
     date: "June 2024", event: "First adventure",
     desc: "We got lost and found something better.",
     img: "https://images.unsplash.com/photo-1504006833117-8886a355efbf?w=220&q=75&fit=crop",
     rot: "3deg",
+    sidePin: -1,
+    offsetY: 15,
+    offsetX: 8,
+    petalAng: -60,
   },
   {
     date: "Autumn 2024", event: "You became home",
     desc: "Somewhere along the way, home became a person.",
     img: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=220&q=75&fit=crop",
     rot: "-6deg",
+    sidePin: 1,
+    offsetY: -8,
+    offsetX: -10,
+    petalAng: 120,
   },
   {
     date: "New Year 2025", event: "First midnight",
     desc: "Midnight felt different. Better. Ours.",
     img: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=220&q=75&fit=crop",
     rot: "5deg",
+    sidePin: -1,
+    offsetY: 12,
+    offsetX: 6,
+    petalAng: -45,
   },
   {
     date: "Spring 2025", event: "One year together",
     desc: "365 days and still choosing each other every morning.",
     img: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=220&q=75&fit=crop",
     rot: "-3deg",
+    sidePin: 1,
+    offsetY: 8,
+    offsetX: -12,
+    petalAng: 160,
   },
   {
     date: "May 2026", event: "Two whole years",
     desc: "730 days of ordinary moments made extraordinary.",
     img: "https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?w=220&q=75&fit=crop",
     rot: "4deg",
+    sidePin: -1,
+    offsetY: -5,
+    offsetX: 10,
+    petalAng: -120,
   },
 ];
 
@@ -120,6 +127,26 @@ function LeafSvg({ className }: { className: string }) {
       {/* Stem offshoots */}
       <path d="M60 120 Q45 100 35 95" stroke="#8fa688" strokeWidth="1" fill="none" strokeLinecap="round" />
       <path d="M130 62 Q118 45 110 38" stroke="#8fa688" strokeWidth="1" fill="none" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/* ─── PIN SVG ─── */
+function PinSvg({ className }: { className: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 40 52"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      {/* Pin head - circular */}
+      <circle cx="20" cy="12" r="10" fill="#c97b7b" />
+      {/* Pin head shine */}
+      <circle cx="18" cy="10" r="3" fill="#e8b4b4" opacity="0.6" />
+      {/* Pin shaft */}
+      <path d="M 20 22 Q 18 30 16 42 Q 15 48 20 50 Q 25 48 24 42 Q 22 30 20 22" fill="#b8b8b8" stroke="#999" strokeWidth="0.5" />
     </svg>
   );
 }
@@ -249,7 +276,7 @@ export default function Home() {
             Scroll through the chapters of our story.
           </p>
         </div>
-        <StickyScrollCards cards={CARDS} />
+        <StickyScrollCards cards={MEMORY_CARDS} hint="scroll to explore" />
       </section>
 
       {/* ══ QUOTES GRID ══ */}
@@ -292,14 +319,24 @@ export default function Home() {
               key={i}
               style={{ transitionDelay: `${i * 0.1}s` }}
             >
-              {/* Pinned polaroid image — alternates left/right */}
+              {/* Pinned polaroid image — with pin and petals */}
               <div
                 className="timeline-pin-img"
                 style={{
                   "--pin-rot": item.rot,
-                  "--pin-side": i % 2 === 0 ? "1" : "-1",
+                  "--pin-side": item.sidePin,
+                  "--offset-y": `${item.offsetY}px`,
+                  "--offset-x": `${item.offsetX}px`,
+                  "--petal-ang": `${item.petalAng}deg`,
                 } as React.CSSProperties}
               >
+                {/* Pin at top */}
+                <PinSvg className="timeline-pin-svg" />
+                {/* Petals */}
+                <div className="timeline-petal petal-1" />
+                <div className="timeline-petal petal-2" />
+                <div className="timeline-petal petal-3" />
+                {/* Image */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.img} alt={item.event} loading="lazy" />
                 <div className="timeline-pin-caption">{item.event}</div>

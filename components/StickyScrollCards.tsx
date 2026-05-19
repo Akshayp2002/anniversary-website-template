@@ -25,31 +25,41 @@ const SHIFTS = [
 
 export default function StickyScrollCards({ cards }: Props) {
   const [active, setActive] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window === "undefined" || window.innerWidth < 768) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            const i = itemRefs.current.indexOf(e.target as HTMLDivElement);
-            if (i !== -1) setActive(i);
-          }
-        });
-      },
-      { threshold: 0.5, rootMargin: "-72px 0px -72px 0px" }
-    );
-    itemRefs.current.forEach((el) => el && obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
+
+    const handleScroll = () => {
+      if (!wrapperRef.current || !containerRef.current) return;
+
+      const wrapperRect = wrapperRef.current.getBoundingClientRect();
+      
+      // Calculate scroll progress through the entire memory section
+      const sectionTop = wrapperRect.top + window.scrollY;
+      const sectionBottom = wrapperRect.bottom + window.scrollY;
+      const sectionHeight = sectionBottom - sectionTop;
+      
+      const scrollProgress = Math.max(0, Math.min(1, (window.scrollY - sectionTop) / sectionHeight));
+      const cardIndex = Math.min(cards.length - 1, Math.floor(scrollProgress * cards.length));
+      
+      setActive(cardIndex);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Initial call
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [cards.length]);
 
   return (
     <>
-      {/* ══ DESKTOP — sticky split ══ */}
-      <div className="polaroid-sticky-wrap">
+      {/* ══ DESKTOP — split layout with pinning ══ */}
+      <div className="polaroid-sticky-wrap" ref={wrapperRef}>
 
-        {/* LEFT — sticky image stack */}
+        {/* LEFT — pinned stack that scales down */}
         <div className="polaroid-stack-pane">
           <div className="polaroid-stage-wrap">
 
@@ -60,17 +70,22 @@ export default function StickyScrollCards({ cards }: Props) {
             </div>
 
             {/* Card stack — all cards 0..active rendered, active on top */}
-            <div className="polaroid-stage">
+            <div className="polaroid-stage" ref={stageRef}>
               {cards.map((card, i) => {
-                // Only render up to active + 1 (cards pile up)
-                if (i > active) return null;
+                // Show all cards that have been reached or are next
+                if (i > active + 1) return null;
 
                 const isTop   = i === active;
+                const isNext  = i === active + 1;
                 const depth   = active - i;            // 0 = top, 1 = one below, etc
+                
+                // Sequential animation: cards come from bottom, layer without overlapping, then overlap
+                const fromBottom = isNext ? 450 : 0;  // Next card starts 450px below
+                const stackY   = depth * 20 + fromBottom;  // Layered stacking with from-bottom offset
                 const rot     = ROTS[i % ROTS.length];
                 const shift   = SHIFTS[i % SHIFTS.length];
-                const stackY  = depth * 6;            // push older cards down slightly
-                const stackS  = 1 - depth * 0.04;    // slightly shrink older cards
+                const stackX  = depth * 6;
+                const stackS  = 1 - depth * 0.14;     // More pronounced scale for better layering
 
                 return (
                   <div
@@ -79,13 +94,13 @@ export default function StickyScrollCards({ cards }: Props) {
                     style={{
                       zIndex:     50 - depth,
                       transform:  isTop
-                        ? `rotate(${rot * 0.3}deg) translate(0px, 0px) scale(1)`
-                        : `rotate(${rot}deg) translate(${shift.x}px, ${shift.y + stackY}px) scale(${stackS})`,
-                      opacity:    isTop ? 1 : Math.max(0.35, 1 - depth * 0.2),
-                      transition: "transform 0.75s cubic-bezier(0.22,1,0.36,1), opacity 0.5s ease, box-shadow 0.5s ease",
+                        ? `translateY(0) rotate(${rot * 0.3}deg) scale(1)`
+                        : `translateY(${stackY}px) rotate(${rot * 0.5}deg) translate(${shift.x + stackX}px, ${shift.y}px) scale(${stackS})`,
+                      opacity:    1,
+                      transition: "transform 1.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1.4s ease, box-shadow 1.4s ease",
                       boxShadow:  isTop
-                        ? "6px 12px 48px rgba(60,30,10,0.35), 0 2px 6px rgba(0,0,0,0.15)"
-                        : "3px 5px 18px rgba(60,30,10,0.18)",
+                        ? "12px 24px 64px rgba(60,30,10,0.35), 0 4px 12px rgba(0,0,0,0.15)"
+                        : "6px 12px 32px rgba(60,30,10,0.2)",
                     }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -93,7 +108,9 @@ export default function StickyScrollCards({ cards }: Props) {
 
                     {/* Caption INSIDE the white bottom strip of the polaroid */}
                     {isTop && (
-                      <div className="p-card-inner-caption">{card.caption}</div>
+                      <div className="p-card-inner-caption">
+                        <div>{card.caption}</div>
+                      </div>
                     )}
                   </div>
                 );
@@ -119,7 +136,7 @@ export default function StickyScrollCards({ cards }: Props) {
         </div>
 
         {/* RIGHT — scroll track */}
-        <div className="polaroid-scroll-track">
+        <div className="polaroid-scroll-track" ref={containerRef}>
           {cards.map((card, i) => (
             <div
               key={card.id}
@@ -146,16 +163,6 @@ export default function StickyScrollCards({ cards }: Props) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={card.src} alt={card.caption} loading="lazy" />
             <div className="mob-pol-cap">{card.caption}</div>
-          </div>
-        ))}
-      </div>
-      <div className="mobile-text-list">
-        {cards.map((card, i) => (
-          <div key={card.id} style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--border)" }}>
-            <div className="polaroid-scroll-num" style={{ fontSize: "2rem" }}>0{i + 1}</div>
-            <div className="polaroid-scroll-title" style={{ fontSize: "1.1rem" }}>{card.title}</div>
-            <div className="polaroid-scroll-date">{card.date}</div>
-            <p className="polaroid-scroll-desc" style={{ marginTop: "0.5rem" }}>{card.caption}</p>
           </div>
         ))}
       </div>
