@@ -44,7 +44,7 @@ const QUOTES = [
 
 const TIMELINE = [
   {
-    date: "May 2024", event: "Day one",
+    date: "July 2024", event: "Day one",
     desc: "The moment our story quietly began.",
     img: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=300&q=80&fit=crop",
     rot: "-6deg",
@@ -74,7 +74,7 @@ const TIMELINE = [
     rot: "-4deg",
   },
   {
-    date: "May 2026", event: "Two whole years",
+    date: "July 2026", event: "Two whole years",
     desc: "730 days of ordinary moments made extraordinary.",
     img: "https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=300&q=80&fit=crop",
     rot: "7deg",
@@ -351,7 +351,7 @@ export default function Home() {
         <LeafSvg className="hero-botanical hero-botanical-tl" />
         <LeafSvg className="hero-botanical hero-botanical-tr" />
 
-        <span className="closing-label reveal">May 19, 2026</span>
+        <span className="closing-label reveal">July 21, 2026</span>
         <h2 className="closing-title reveal d1">
           To the next<br /><em>chapter</em>
         </h2>
@@ -365,7 +365,7 @@ export default function Home() {
 
       {/* FOOTER */}
       <footer className="footer">
-        <p>Two Years Together &bull; May 19, 2024 – May 19, 2026 &bull; Made with love ♥</p>
+        <p>Two Years Together &bull; July 21, 2024 – July 21, 2026 &bull; Made with love ♥</p>
       </footer>
     </>
   );
