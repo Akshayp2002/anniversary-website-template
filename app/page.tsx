@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useId } from "react";
 import { StickyScrollCards } from "@/components/ui/sticky-scroll-cards";
 import type { StickyScrollCardItem } from "@/components/ui/sticky-scroll-cards";
@@ -196,8 +197,10 @@ export default function Home() {
 
       {/* NAV */}
       <nav className="nav">
-        <div className="nav-logo">Two Years ♥</div>
-        <div className="nav-date">May 19, 2024 — May 19, 2026</div>
+        <div className="nav-brand">
+          <div className="nav-logo">Two Years ♥</div>
+          <div className="nav-date">July 21, 2024 — July 21, 2026</div>
+        </div>
       </nav>
 
       {/* ══ HERO ══ */}
@@ -237,7 +240,6 @@ export default function Home() {
             </div>
           ))}
         </div>
-
         <div className="scroll-hint">
           <span>scroll</span>
           <div className="scroll-mouse" />
@@ -323,8 +325,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ══ FEATURED QUOTE 3 ══ */}
-      <section className="featured-quote">
+      {/* ══ FEATURED QUOTE 3 + GALLERY CTA ══ */}
+      <section className="featured-quote featured-quote-cta">
         <span className="quote-ornament">&ldquo;</span>
         <blockquote className="featured-quote-text reveal">
           You are my today and{" "}
@@ -332,6 +334,15 @@ export default function Home() {
         </blockquote>
         <div className="quote-line" />
         <cite className="featured-quote-source reveal d1">— Leo Christopher</cite>
+
+        <div className="gallery-cta reveal d2">
+          <p className="gallery-cta-eyebrow">Just for us</p>
+          <Link href="/gallery" className="gallery-cta-btn">
+            <span className="gallery-cta-btn-shine" aria-hidden="true" />
+            <span className="gallery-cta-btn-text">Open private gallery</span>
+            <span className="gallery-cta-btn-arrow" aria-hidden="true">→</span>
+          </Link>
+        </div>
       </section>
 
       {/* ══ CLOSING ══ */}

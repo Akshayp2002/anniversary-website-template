@@ -68,11 +68,11 @@ function StickyScrollCard({
           scale,
           rotate: rotation,
           top: `${staggerOffset}px`,
-          borderRadius: 6,
+          borderRadius: 3,
           boxShadow:
             "0 4px 20px rgba(60,30,10,0.12), 0 10px 40px rgba(0,0,0,0.08)",
         }}
-        className="relative origin-center overflow-hidden bg-white w-[88vw] max-w-[360px] md:w-[480px] md:max-w-none lg:w-[560px] border border-neutral-100/60"
+        className="relative origin-center overflow-hidden bg-white w-[88vw] max-w-[360px] md:w-[480px] md:max-w-none lg:w-[560px] border border-6 border-neutral-100/60"
       >
         {/* White border on three sides — classic polaroid style */}
         <div className="p-3 pb-0 md:p-4 md:pb-0">
