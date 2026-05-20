@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { StickyScrollCards } from "@/components/ui/sticky-scroll-cards";
 import type { StickyScrollCardItem } from "@/components/ui/sticky-scroll-cards";
 
@@ -45,62 +45,38 @@ const TIMELINE = [
   {
     date: "May 2024", event: "Day one",
     desc: "The moment our story quietly began.",
-    img: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=220&q=75&fit=crop",
-    rot: "-4deg",
-    sidePin: 1,
-    offsetY: 0,
-    offsetX: 0,
-    petalAng: 45,
+    img: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=300&q=80&fit=crop",
+    rot: "-6deg",
   },
   {
     date: "June 2024", event: "First adventure",
     desc: "We got lost and found something better.",
-    img: "https://images.unsplash.com/photo-1504006833117-8886a355efbf?w=220&q=75&fit=crop",
-    rot: "3deg",
-    sidePin: -1,
-    offsetY: 15,
-    offsetX: 8,
-    petalAng: -60,
+    img: "https://images.unsplash.com/photo-1494774157365-9e04c6720e47?w=300&q=80&fit=crop",
+    rot: "5deg",
   },
   {
     date: "Autumn 2024", event: "You became home",
     desc: "Somewhere along the way, home became a person.",
-    img: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=220&q=75&fit=crop",
-    rot: "-6deg",
-    sidePin: 1,
-    offsetY: -8,
-    offsetX: -10,
-    petalAng: 120,
+    img: "https://images.unsplash.com/photo-1545389336-cf090694435e?w=300&q=80&fit=crop",
+    rot: "-7deg",
   },
   {
     date: "New Year 2025", event: "First midnight",
     desc: "Midnight felt different. Better. Ours.",
-    img: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=220&q=75&fit=crop",
-    rot: "5deg",
-    sidePin: -1,
-    offsetY: 12,
-    offsetX: 6,
-    petalAng: -45,
+    img: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=300&q=80&fit=crop",
+    rot: "6deg",
   },
   {
     date: "Spring 2025", event: "One year together",
     desc: "365 days and still choosing each other every morning.",
-    img: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=220&q=75&fit=crop",
-    rot: "-3deg",
-    sidePin: 1,
-    offsetY: 8,
-    offsetX: -12,
-    petalAng: 160,
+    img: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=300&q=80&fit=crop",
+    rot: "-4deg",
   },
   {
     date: "May 2026", event: "Two whole years",
     desc: "730 days of ordinary moments made extraordinary.",
-    img: "https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?w=220&q=75&fit=crop",
-    rot: "4deg",
-    sidePin: -1,
-    offsetY: -5,
-    offsetX: 10,
-    petalAng: -120,
+    img: "https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=300&q=80&fit=crop",
+    rot: "7deg",
   },
 ];
 
@@ -131,23 +107,35 @@ function LeafSvg({ className }: { className: string }) {
   );
 }
 
-/* ─── PIN SVG ─── */
-function PinSvg({ className }: { className: string }) {
+/* ─── Realistic push pin ─── */
+function PushPin({ className }: { className: string }) {
+  const uid = useId().replace(/:/g, "");
+  const headId = `pinHead-${uid}`;
+  const needleId = `pinNeedle-${uid}`;
+
   return (
-    <svg
-      className={className}
-      viewBox="0 0 40 52"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      {/* Pin head - circular */}
-      <circle cx="20" cy="12" r="10" fill="#c97b7b" />
-      {/* Pin head shine */}
-      <circle cx="18" cy="10" r="3" fill="#e8b4b4" opacity="0.6" />
-      {/* Pin shaft */}
-      <path d="M 20 22 Q 18 30 16 42 Q 15 48 20 50 Q 25 48 24 42 Q 22 30 20 22" fill="#b8b8b8" stroke="#999" strokeWidth="0.5" />
-    </svg>
+    <div className={className} aria-hidden="true">
+      <svg viewBox="0 0 32 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id={headId} cx="35%" cy="30%" r="65%">
+            <stop offset="0%" stopColor="#f4a4a4" />
+            <stop offset="45%" stopColor="#d46262" />
+            <stop offset="100%" stopColor="#9e3d3d" />
+          </radialGradient>
+          <linearGradient id={needleId} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#e8e8e8" />
+            <stop offset="50%" stopColor="#a8a8a8" />
+            <stop offset="100%" stopColor="#6a6a6a" />
+          </linearGradient>
+        </defs>
+        <ellipse cx="16" cy="28" rx="4" ry="1.2" fill="rgba(0,0,0,0.12)" />
+        <line x1="16" y1="22" x2="16" y2="44" stroke={`url(#${needleId})`} strokeWidth="1.2" strokeLinecap="round" />
+        <line x1="16" y1="44" x2="16" y2="46" stroke="#555" strokeWidth="0.8" strokeLinecap="round" />
+        <ellipse cx="16" cy="14" rx="9" ry="7.5" fill={`url(#${headId})`} />
+        <ellipse cx="13" cy="11" rx="3" ry="2" fill="rgba(255,255,255,0.45)" />
+        <ellipse cx="16" cy="20" rx="6" ry="1.5" fill="rgba(0,0,0,0.08)" />
+      </svg>
+    </div>
   );
 }
 
@@ -305,38 +293,31 @@ export default function Home() {
           <span className="section-label reveal">Our story</span>
           <h2 className="section-title reveal d1">Chapter by <em>chapter</em></h2>
         </div>
-        <div className="timeline-inner">
+        <div className="timeline-grid">
           {TIMELINE.map((item, i) => (
             <div
-              className="timeline-item"
+              className="timeline-card reveal"
               key={i}
-              style={{ transitionDelay: `${i * 0.1}s` }}
+              style={{ transitionDelay: `${i * 0.12}s` }}
             >
-              {/* Pinned polaroid image — with pin and petals */}
               <div
-                className="timeline-pin-img"
-                style={{
-                  "--pin-rot": item.rot,
-                  "--pin-side": item.sidePin,
-                  "--offset-y": `${item.offsetY}px`,
-                  "--offset-x": `${item.offsetX}px`,
-                  "--petal-ang": `${item.petalAng}deg`,
-                } as React.CSSProperties}
+                className="timeline-polaroid-wrap"
+                style={{ "--tilt": item.rot } as React.CSSProperties}
               >
-                {/* Pin at top */}
-                <PinSvg className="timeline-pin-svg" />
-                {/* Petals */}
-                <div className="timeline-petal petal-1" />
-                <div className="timeline-petal petal-2" />
-                <div className="timeline-petal petal-3" />
-                {/* Image */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.img} alt={item.event} loading="lazy" />
-                <div className="timeline-pin-caption">{item.event}</div>
+                <div className="timeline-polaroid">
+                  <PushPin className="timeline-pin" />
+                  <div className="timeline-photo">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={item.img} alt={item.event} loading="lazy" />
+                  </div>
+                </div>
               </div>
-              <div className="timeline-date">{item.date}</div>
-              <div className="timeline-event">{item.event}</div>
-              <div className="timeline-desc">{item.desc}</div>
+              {/* Text content */}
+              <div className="timeline-card-text">
+                <div className="timeline-date">{item.date}</div>
+                <div className="timeline-event">{item.event}</div>
+                <div className="timeline-desc">{item.desc}</div>
+              </div>
             </div>
           ))}
         </div>
