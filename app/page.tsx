@@ -269,13 +269,6 @@ export default function Home() {
 
       {/* ══ MEMORIES / POLAROID STACK ══ */}
       <section className="memories-section">
-        <div className="memories-header">
-          <span className="section-label reveal">Our memories</span>
-          <h2 className="section-title reveal d1">A year of <em>moments</em></h2>
-          <p style={{ color: "var(--text3)", fontSize: "0.82rem" }} className="reveal d2">
-            Scroll through the chapters of our story.
-          </p>
-        </div>
         <StickyScrollCards cards={MEMORY_CARDS} hint="scroll to explore" />
       </section>
 

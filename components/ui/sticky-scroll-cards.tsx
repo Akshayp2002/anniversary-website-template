@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { motion, useScroll, useTransform } from "framer-motion";
 import ReactLenis from "lenis/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface StickyScrollCardItem {
   title: string;
@@ -43,6 +43,7 @@ interface StickyScrollCardProps {
   progress: ReturnType<typeof useScroll>["scrollYProgress"];
   range: [number, number];
   targetScale: number;
+  isMobile: boolean;
 }
 
 function StickyScrollCard({
@@ -52,38 +53,42 @@ function StickyScrollCard({
   progress,
   range,
   targetScale,
+  isMobile,
 }: StickyScrollCardProps) {
   const scale = useTransform(progress, range, [1, targetScale]);
   const rotation = CARD_ROTATIONS[i % CARD_ROTATIONS.length];
 
+  // Adjust stagger offset so cards stack neatly below the sticky header without overflowing on shorter screens
+  const staggerOffset = isMobile ? i * 8 + 15 : i * 16 + 32;
+
   return (
-    <div className="sticky top-0 flex h-screen items-center justify-center">
+    <div className="sticky top-0 flex h-screen items-center justify-center pt-[22vh] md:pt-[24vh]">
       <motion.div
         style={{
           scale,
           rotate: rotation,
-          top: `calc(-5vh + ${i * 22 + 160}px)`,
-          borderRadius: 4,
+          top: `${staggerOffset}px`,
+          borderRadius: 6,
           boxShadow:
-            "0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.07), 0 12px 32px rgba(0,0,0,0.10), 0 24px 56px rgba(0,0,0,0.08)",
+            "0 4px 20px rgba(60,30,10,0.12), 0 10px 40px rgba(0,0,0,0.08)",
         }}
-        className="relative -top-1/4 origin-top overflow-hidden bg-white"
+        className="relative origin-center overflow-hidden bg-white w-[88vw] max-w-[360px] md:w-[480px] md:max-w-none lg:w-[560px] border border-neutral-100/60"
       >
-        {/* 10px border on three sides */}
-        <div className="p-[10px] pb-0">
-          <div className="w-[460px] overflow-hidden">
+        {/* White border on three sides — classic polaroid style */}
+        <div className="p-3 pb-0 md:p-4 md:pb-0">
+          <div className="w-full overflow-hidden rounded-sm">
             <img
               src={src}
               alt={title}
-              className="block h-[290px] w-full object-cover"
+              className="block h-[200px] sm:h-[220px] md:h-[310px] lg:h-[370px] w-full object-cover border border-neutral-100/30"
               draggable={false}
             />
           </div>
         </div>
 
-        {/* Caption strip — trimmed height */}
-        <div className="flex h-[44px] items-center justify-center px-4">
-          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">
+        {/* Caption strip with romantic editorial font style */}
+        <div className="flex h-[48px] md:h-[64px] items-center justify-center px-4">
+          <p className="text-[11px] md:text-[12px] lg:text-[13px] font-serif font-medium italic tracking-[0.1em] text-[#6b5a50]">
             {title}
           </p>
         </div>
@@ -112,6 +117,14 @@ export function StickyScrollCards({
     offset: ["start start", "end end"],
   });
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   // Hide the native scrollbar while this component is mounted
   useEffect(() => {
     const style = document.createElement("style");
@@ -120,7 +133,8 @@ export function StickyScrollCards({
       "html { scrollbar-width: none; -ms-overflow-style: none; } html::-webkit-scrollbar { display: none; }";
     document.head.appendChild(style);
     return () => {
-      document.getElementById("__sticky-scroll-cards-no-bar")?.remove();
+      const el = document.getElementById("__sticky-scroll-cards-no-bar");
+      if (el) el.remove();
     };
   }, []);
 
@@ -129,28 +143,44 @@ export function StickyScrollCards({
       <main
         ref={container}
         className={cn(
-          "relative flex w-full flex-col items-center justify-center pb-[100vh] pt-[50vh]",
+          "relative flex w-full flex-col items-center justify-center pt-[15vh] pb-[50vh] md:pt-[25vh] md:pb-[75vh]",
           className
         )}
       >
+        {/* Persistent Sticky Header */}
+        <div className="sticky top-[85px] md:top-[125px] z-20 w-full text-center pointer-events-none pb-2 px-4">
+          <span className="text-[0.6rem] tracking-[0.3em] uppercase text-[#c97b7b] block mb-1">
+            Our memories
+          </span>
+          <h2 className="font-serif text-2xl md:text-4xl lg:text-5xl font-normal text-[#2d2520] leading-tight">
+            A year of <em className="italic text-[#c97b7b] font-light">moments</em>
+          </h2>
+          <p className="text-[0.7rem] md:text-[0.82rem] text-[#6b5a50] mt-1 mx-auto text-center">
+            Scroll through the chapters of our story.
+          </p>
+        </div>
+
         {/* Hint label */}
-        <div className="absolute left-1/2 top-[8%] flex -translate-x-1/2 flex-col items-center gap-3">
-          <p className="text-[10px] font-medium uppercase tracking-[0.2em] opacity-30">
+        <div className="absolute left-1/2 top-[3%] md:top-[6%] flex -translate-x-1/2 flex-col items-center gap-2">
+          <p className="text-[9px] md:text-[10px] font-medium uppercase tracking-[0.2em] opacity-30 text-[#6b5a50]">
             {hint}
           </p>
-          <span className="h-12 w-px bg-gradient-to-b from-foreground/30 to-transparent" />
+          <span className="h-8 md:h-12 w-px bg-gradient-to-b from-[#6b5a50]/30 to-transparent" />
         </div>
 
         {cards.map((card, i) => {
-          const targetScale = Math.max(0.5, 1 - (cards.length - i - 1) * 0.1);
+          const targetScale = Math.max(0.6, 1 - (cards.length - i - 1) * 0.06);
+          const step = 0.75 / (cards.length - 1 || 1);
+          const startRange = i * step;
           return (
             <StickyScrollCard
               key={`card_${i}`}
               i={i}
               {...card}
               progress={scrollYProgress}
-              range={[i * 0.25, 1]}
+              range={[startRange, 1]}
               targetScale={targetScale}
+              isMobile={isMobile}
             />
           );
         })}
@@ -158,3 +188,4 @@ export function StickyScrollCards({
     </ReactLenis>
   );
 }
+
