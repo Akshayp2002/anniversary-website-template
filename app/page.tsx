@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import { StickyScrollCards } from "@/components/ui/sticky-scroll-cards";
 import type { StickyScrollCardItem } from "@/components/ui/sticky-scroll-cards";
 
@@ -80,6 +80,52 @@ const TIMELINE = [
     rot: "7deg",
   },
 ];
+
+const FALLING_HEARTS = Array.from({ length: 32 }, (_, i) => ({
+  id: i,
+  left: `${(i * 3.4 + 1) % 97}%`,
+  delay: `${(i * 0.48) % 16}s`,
+  duration: `${8 + (i % 11)}s`,
+  size: 5 + (i % 6) * 2,
+  opacity: 0.12 + (i % 4) * 0.08,
+  drift: (i % 2 === 0 ? -1 : 1) * (6 + (i % 8)),
+}));
+
+const HERO_SPARKLES = Array.from({ length: 14 }, (_, i) => ({
+  id: i,
+  top: `${10 + (i * 6.1) % 78}%`,
+  left: `${6 + (i * 7.4) % 88}%`,
+  delay: `${i * 0.35}s`,
+}));
+
+const CLOSING_SPARKLES = Array.from({ length: 10 }, (_, i) => ({
+  id: i,
+  top: `${15 + (i * 7.5) % 70}%`,
+  left: `${6 + (i * 9.2) % 88}%`,
+  delay: `${i * 0.4}s`,
+}));
+
+/* ─── ROSE SVG ─── */
+function RoseSvg({ className }: { className: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 80 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path d="M40 95 Q38 70 40 55" stroke="#8fa688" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+      <path d="M40 70 Q25 65 18 55" stroke="#8fa688" strokeWidth="0.8" fill="none" strokeLinecap="round" />
+      <path d="M40 75 Q55 68 62 58" stroke="#8fa688" strokeWidth="0.8" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="38" r="14" fill="#e8b4b4" opacity="0.5" />
+      <circle cx="34" cy="32" r="10" fill="#f5e6e6" opacity="0.7" />
+      <circle cx="46" cy="32" r="10" fill="#d4997a" opacity="0.45" />
+      <circle cx="40" cy="28" r="8" fill="#c97b7b" opacity="0.55" />
+      <circle cx="40" cy="26" r="4" fill="#e8b4b4" opacity="0.8" />
+    </svg>
+  );
+}
 
 /* ─── BOTANICAL SVG ─── */
 function LeafSvg({ className }: { className: string }) {
@@ -187,9 +233,41 @@ function useReveal() {
   }, []);
 }
 
+function useHeroParallax() {
+  const heroRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el) return;
+
+    const onMove = (e: MouseEvent) => {
+      const r = el.getBoundingClientRect();
+      const mx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+      const my = ((e.clientY - r.top) / r.height - 0.5) * 2;
+      el.style.setProperty("--mx", String(mx));
+      el.style.setProperty("--my", String(my));
+    };
+
+    const onLeave = () => {
+      el.style.setProperty("--mx", "0");
+      el.style.setProperty("--my", "0");
+    };
+
+    el.addEventListener("mousemove", onMove);
+    el.addEventListener("mouseleave", onLeave);
+    return () => {
+      el.removeEventListener("mousemove", onMove);
+      el.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
+
+  return heroRef;
+}
+
 /* ─── PAGE ─── */
 export default function Home() {
   useReveal();
+  const heroRef = useHeroParallax();
 
   return (
     <>
@@ -204,42 +282,120 @@ export default function Home() {
       </nav>
 
       {/* ══ HERO ══ */}
-      <section className="hero">
-        {/* Botanical corner decorations */}
+      <section className="hero" ref={heroRef}>
+        <div className="hero-vignette" aria-hidden="true" />
+        <div className="hero-royal-rays" aria-hidden="true" />
+        <div className="hero-glow" aria-hidden="true" />
+        <div className="hero-shimmer" aria-hidden="true" />
+
+        <div className="hero-hearts-fall" aria-hidden="true">
+          {FALLING_HEARTS.map((h) => (
+            <span
+              key={h.id}
+              className="hero-falling-heart"
+              style={{
+                "--heart-left": h.left,
+                "--heart-delay": h.delay,
+                "--heart-dur": h.duration,
+                "--heart-size": `${h.size}px`,
+                "--heart-o": h.opacity,
+                "--heart-drift": `${h.drift}px`,
+              } as React.CSSProperties}
+            >
+              ♥
+            </span>
+          ))}
+        </div>
+
+        <div className="hero-floats" aria-hidden="true">
+          {["♥", "✦", "❋", "♥", "✦", "♥"].map((icon, i) => (
+            <span className="hero-float" key={i} style={{ "--float-i": i } as React.CSSProperties}>
+              {icon}
+            </span>
+          ))}
+        </div>
+
+        <div className="hero-sparkles" aria-hidden="true">
+          {HERO_SPARKLES.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              className="hero-sparkle"
+              tabIndex={-1}
+              aria-hidden="true"
+              style={{
+                top: s.top,
+                left: s.left,
+                animationDelay: s.delay,
+              }}
+            />
+          ))}
+        </div>
+
         <LeafSvg className="hero-botanical hero-botanical-tl" />
         <LeafSvg className="hero-botanical hero-botanical-tr" />
         <LeafSvg className="hero-botanical hero-botanical-bl" />
         <LeafSvg className="hero-botanical hero-botanical-br" />
+        <RoseSvg className="hero-rose hero-rose-l" />
+        <RoseSvg className="hero-rose hero-rose-r" />
 
-        <p className="hero-eyebrow">A celebration of us</p>
+        <div className="hero-content">
+          <div className="hero-frame" aria-hidden="true">
+            <span className="hero-frame-corner hero-frame-tl" />
+            <span className="hero-frame-corner hero-frame-tr" />
+            <span className="hero-frame-corner hero-frame-bl" />
+            <span className="hero-frame-corner hero-frame-br" />
+            <span className="hero-jewel hero-jewel-t" />
+            <span className="hero-jewel hero-jewel-b" />
+          </div>
 
-        <h1 className="hero-title">
-          Two
-          <em>years together</em>
-        </h1>
+          <div className="hero-ornament-line" aria-hidden="true">
+            <span className="hero-ornament-wing">— ✦ —</span>
+            <span className="hero-ornament-center">♥</span>
+            <span className="hero-ornament-wing">— ✦ —</span>
+          </div>
 
-        <p className="hero-subtitle">
-          Still us. Still here. Still choosing each other — every single day.
-        </p>
+          <p className="hero-eyebrow">A celebration of us</p>
+          <p className="hero-since">Since July 21, 2024</p>
 
-        <div className="hero-divider">
-          <div className="hero-divider-line" />
-          <span className="hero-divider-icon">✦</span>
-          <div className="hero-divider-line" />
+          <h1 className="hero-title">
+            Two
+            <em>years together</em>
+          </h1>
+
+          <p className="hero-subtitle">
+            Still us. Still here. Still choosing each other — every single day.
+          </p>
+          <p className="hero-whisper">
+            Two hearts, one story — and I&apos;d write every page with you again.
+          </p>
+
+          <div className="hero-divider">
+            <span className="hero-divider-line" />
+            <span className="hero-divider-icon" aria-hidden="true">♥</span>
+            <span className="hero-divider-line" />
+          </div>
+
+          <div className="hero-date-badge">
+            <span>July 21, 2024</span>
+            <span className="hero-date-heart" aria-hidden="true">♥</span>
+            <span>July 21, 2026</span>
+          </div>
+
+          <div className="hero-counter">
+            {[
+              { num: "730", label: "Days" },
+              { num: "∞",   label: "Memories" },
+              { num: "1",   label: "Us" },
+            ].map(({ num, label }) => (
+              <div className="hero-counter-item" key={label}>
+                <span className="hero-counter-num">{num}</span>
+                <span className="hero-counter-label">{label}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="hero-counter">
-          {[
-            { num: "730", label: "Days" },
-            { num: "∞",   label: "Memories" },
-            { num: "1",   label: "Us" },
-          ].map(({ num, label }) => (
-            <div className="hero-counter-item" key={label}>
-              <span className="hero-counter-num">{num}</span>
-              <span className="hero-counter-label">{label}</span>
-            </div>
-          ))}
-        </div>
         <div className="scroll-hint">
           <span>scroll</span>
           <div className="scroll-mouse" />
@@ -347,20 +503,68 @@ export default function Home() {
 
       {/* ══ CLOSING ══ */}
       <section className="closing">
-        {/* Botanical accents */}
+        <div className="closing-glow" aria-hidden="true" />
+        <div className="closing-shimmer" aria-hidden="true" />
+
+        <div className="closing-floats" aria-hidden="true">
+          {["♥", "✦", "❋", "♥"].map((icon, i) => (
+            <span className="closing-float" key={i} style={{ "--cf-i": i } as React.CSSProperties}>
+              {icon}
+            </span>
+          ))}
+        </div>
+
+        <div className="closing-sparkles" aria-hidden="true">
+          {CLOSING_SPARKLES.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              className="closing-sparkle"
+              tabIndex={-1}
+              aria-hidden="true"
+              style={{ top: s.top, left: s.left, animationDelay: s.delay }}
+            />
+          ))}
+        </div>
+
         <LeafSvg className="hero-botanical hero-botanical-tl" />
         <LeafSvg className="hero-botanical hero-botanical-tr" />
+        <LeafSvg className="hero-botanical hero-botanical-bl" />
+        <LeafSvg className="hero-botanical hero-botanical-br" />
+        <RoseSvg className="hero-rose hero-rose-l closing-rose-l" />
+        <RoseSvg className="hero-rose hero-rose-r closing-rose-r" />
 
-        <span className="closing-label reveal">July 21, 2026</span>
-        <h2 className="closing-title reveal d1">
-          To the next<br /><em>chapter</em>
-        </h2>
-        <div className="closing-heart reveal d2">🌸</div>
-        <p className="closing-msg reveal d3">
-          Thank you for every ordinary Tuesday. Every shared silence.
-          Every laugh that turned into something more.
-          Here&apos;s to two years — and every day after.
-        </p>
+        <div className="closing-content">
+          <div className="closing-frame" aria-hidden="true">
+            <span className="closing-frame-corner closing-frame-tl" />
+            <span className="closing-frame-corner closing-frame-tr" />
+            <span className="closing-frame-corner closing-frame-bl" />
+            <span className="closing-frame-corner closing-frame-br" />
+          </div>
+
+          <div className="closing-ornament reveal" aria-hidden="true">
+            <span className="closing-ornament-wing">— ✦ —</span>
+            <span className="closing-ornament-center">♥</span>
+            <span className="closing-ornament-wing">— ✦ —</span>
+          </div>
+
+          <span className="closing-label reveal">July 21, 2026</span>
+          <h2 className="closing-title reveal d1">
+            To the next<br /><em>chapter</em>
+          </h2>
+
+          <button type="button" className="closing-bloom reveal d2" aria-label="Love">
+            🌸
+          </button>
+
+          <p className="closing-msg reveal d3">
+            Thank you for every ordinary Tuesday. Every shared silence.
+            Every laugh that turned into something more.
+            Here&apos;s to two years — and every day after.
+          </p>
+
+          <p className="closing-tagline reveal d3">Forever &amp; always ♥</p>
+        </div>
       </section>
 
       {/* FOOTER */}
