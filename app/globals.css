@@ -2,6 +2,27 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+* {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.love-heart {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  color: #ff4d6d;
+  will-change: transform, opacity;
+}
+
+.hero-date-badge,
+.hero-counter-item,
+.sticky-scroll-card-love-zone,
+.quote-card,
+.timeline-card {
+  cursor: pointer;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* ════════════════════════════════════════════

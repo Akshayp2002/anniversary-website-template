@@ -1,9 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import { StickyScrollCards } from "@/components/ui/sticky-scroll-cards";
 import type { StickyScrollCardItem } from "@/components/ui/sticky-scroll-cards";
+
+/* ══════════════════════════════════════════════════
+   HEART BURST COMPONENT
+   ══════════════════════════════════════════════════ */
+function Heart({ x, y, size, duration, delay, color }: { x: number; y: number; size: number; duration: number; delay: number; color: string }) {
+  return (
+    <motion.span
+      className="love-heart"
+      style={{ left: x, top: y } as React.CSSProperties}
+      initial={{ scale: 0, opacity: 1 }}
+      animate={{
+        scale: [0, 1.6, 1.1, 0.9],
+        opacity: [1, 0.85, 0.5, 0],
+        y: [0, window.innerHeight * 0.6],
+        x: [0, (Math.random() - 0.5) * 120, (Math.random() - 0.5) * 220],
+        rotate: [0, (Math.random() - 0.5) * 35, (Math.random() - 0.5) * 60],
+      }}
+      transition={{ duration, delay, ease: "easeOut" }}
+    >
+      <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={{ filter: "drop-shadow(0 0 5px rgba(255,80,120,0.45))" }}>
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+      </svg>
+    </motion.span>
+  );
+}
+
+function LoveHearts({ hearts }: { hearts: Array<{ id: number; x: number; y: number; size: number; duration: number; delay: number; color: string }> }) {
+  return (<div aria-hidden="true">{hearts.map(({ id, x, y, size, duration, color }) => (<Heart key={id} x={x} y={y} size={size} duration={duration} delay={0} color={color} />))}</div>);
+}
 
 /* ─── DATA ─── */
 const MEMORY_CARDS: StickyScrollCardItem[] = [
@@ -269,6 +299,19 @@ export default function Home() {
   useReveal();
   const heroRef = useHeroParallax();
 
+  const mkHeart = () => ({ id: Math.random(), x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1280), y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 720), size: 20 + Math.random() * 28, duration: 1.8 + Math.random() * 1, delay: Math.random() * 0.6, color: ["#ff4d6d", "#e63946", "#c1121f"][Math.random() * 3 | 0] });
+  const [hearts, setHearts] = useState<ReturnType<typeof mkHeart>[]>([]);
+
+  const burst = useCallback(() => {
+    const n = 32;
+    const fresh = Array.from({ length: n }, mkHeart);
+    setHearts((prev) => [...prev, ...fresh]);
+    setTimeout(() => {
+      const idSet = new Set(fresh.map(h => h.id));
+      setHearts((prev) => prev.filter((h) => !idSet.has(h.id)));
+    }, 4_500);
+  }, []);
+
   return (
     <>
       <Background />
@@ -376,7 +419,7 @@ export default function Home() {
             <span className="hero-divider-line" />
           </div>
 
-          <div className="hero-date-badge">
+          <div className="hero-date-badge" onClick={burst}>
             <span>July 21, 2024</span>
             <span className="hero-date-heart" aria-hidden="true">♥</span>
             <span>July 21, 2026</span>
@@ -388,7 +431,7 @@ export default function Home() {
               { num: "∞",   label: "Memories" },
               { num: "1",   label: "Us" },
             ].map(({ num, label }) => (
-              <div className="hero-counter-item" key={label}>
+              <div className="hero-counter-item" key={label} onClick={burst}>
                 <span className="hero-counter-num">{num}</span>
                 <span className="hero-counter-label">{label}</span>
               </div>
@@ -415,7 +458,7 @@ export default function Home() {
 
       {/* ══ MEMORIES / POLAROID STACK ══ */}
       <section className="memories-section">
-        <StickyScrollCards cards={MEMORY_CARDS} hint="scroll to explore" />
+        <StickyScrollCards cards={MEMORY_CARDS} hint="scroll to explore" onLove={burst} />
       </section>
 
       {/* ══ QUOTES GRID ══ */}
@@ -426,7 +469,7 @@ export default function Home() {
         </div>
         <div className="quotes-grid">
           {QUOTES.map((q, i) => (
-            <div className={`quote-card reveal d${(i % 3) + 1}`} key={i}>
+            <div className={`quote-card reveal d${(i % 3) + 1}`} key={i} onClick={burst}>
               <p className="quote-text">&ldquo;{q.text}&rdquo;</p>
               <p className="quote-author">— {q.author}</p>
             </div>
@@ -457,6 +500,7 @@ export default function Home() {
               className="timeline-card reveal"
               key={i}
               style={{ transitionDelay: `${i * 0.12}s` }}
+              onClick={burst}
             >
               <div
                 className="timeline-polaroid-wrap"
@@ -550,10 +594,10 @@ export default function Home() {
 
           <span className="closing-label reveal">July 21, 2026</span>
           <h2 className="closing-title reveal d1">
-            To the next<br /><em>chapter</em>
+            To the next <em>chapter</em>
           </h2>
 
-          <button type="button" className="closing-bloom reveal d2" aria-label="Love">
+          <button type="button" className="closing-bloom reveal d2" aria-label="Love" onClick={burst}>
             🌸
           </button>
 
@@ -566,6 +610,8 @@ export default function Home() {
           <p className="closing-tagline reveal d3">Forever &amp; always ♥</p>
         </div>
       </section>
+
+      <LoveHearts hearts={hearts} />
 
       {/* FOOTER */}
       <footer className="footer">

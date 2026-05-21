@@ -44,6 +44,7 @@ interface StickyScrollCardProps {
   range: [number, number];
   targetScale: number;
   isMobile: boolean;
+  onLove?: () => void;
 }
 
 function StickyScrollCard({
@@ -54,6 +55,7 @@ function StickyScrollCard({
   range,
   targetScale,
   isMobile,
+  onLove,
 }: StickyScrollCardProps) {
   const scale = useTransform(progress, range, [1, targetScale]);
   const rotation = CARD_ROTATIONS[i % CARD_ROTATIONS.length];
@@ -62,7 +64,7 @@ function StickyScrollCard({
   const staggerOffset = isMobile ? i * 8 + 15 : i * 16 + 32;
 
   return (
-    <div className="sticky top-0 flex h-screen items-center justify-center pt-[22vh] md:pt-[24vh]">
+    <div className="sticky top-0 flex h-screen items-center justify-center pt-[22vh] md:pt-[24vh]" onClick={() => onLove?.()}>
       <motion.div
         style={{
           scale,
@@ -104,12 +106,15 @@ interface StickyScrollCardsProps {
   hint?: string;
   /** Additional CSS classes for the outer container */
   className?: string;
+  /** Called when any card is tapped/clicked */
+  onLove?: () => void;
 }
 
 export function StickyScrollCards({
   cards = DEFAULT_CARDS,
   hint = "scroll to explore",
   className,
+  onLove,
 }: StickyScrollCardsProps) {
   const container = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -181,6 +186,7 @@ export function StickyScrollCards({
               range={[startRange, 1]}
               targetScale={targetScale}
               isMobile={isMobile}
+              onLove={onLove}
             />
           );
         })}
